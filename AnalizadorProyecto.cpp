@@ -67,8 +67,10 @@ int main(){
 				case 0:
 					if(isalpha(caracter)){
 						estado = 1;
+						concatenar += caracter;
 					}else if(isdigit(caracter)){
 						estado = 2;
+						concatenar += caracter;
 					}else if(caracter == ','){
 						estado = 3;
 					}else if(esOperadorComp(&caracter) == 1){
