@@ -73,6 +73,7 @@ int main(){
 						concatenar += caracter;
 					}else if(caracter == ','){
 						estado = 3;
+						concatenas += caracter;
 					}else if(esOperadorComp(&caracter) == 1){
 						estado = 5;
 					}else if(esOperadorArit(&caracter) == 1){
