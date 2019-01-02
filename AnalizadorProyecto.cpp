@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fstream>
 #include <iostream>
 #include <string>
 using namespace std;
@@ -42,7 +43,7 @@ char parenCerrad = ')';
 char llaveCerrad = '}';
 char comillas = '"';
 
-FILE *archivo;
+ifstream archivo;
 char caracter;	// Variable que almacenara el caracter leido
 
 int cont=0;	// Contador de tokens
@@ -53,18 +54,18 @@ int main(){
 	string concatenar = "";
 	int estado;
 	int contToken = 0;
-		
-	archivo=fopen("prueba.txt","r");
+	archivo.open("prueba.txt");
 	if(archivo == NULL){
 		printf("El archivo no existe");
 		exit(0);
 	}else{
 			
 		
-		while(caracter != EOF){
-			//printf("estado = %d\n", estado);
+		while(!archivo.eof()){
+			printf("estado = %d\n", estado);
+			archivo.get(caracter);
 			//printf("****caracter = %c****\n\n", caracter);
-			caracter = getc(archivo);
+			
 			switch(estado){
 				case 0:
 					if(isalpha(caracter)){
@@ -80,6 +81,7 @@ int main(){
 						estado = 5;
 						concatenar += caracter;
 					}else if(esOperadorArit(&caracter) == 1){
+						archivo.unget();
 						estado = 6;
 						concatenar += caracter;
 					}else if(caracter == opAsignacin){
@@ -118,13 +120,14 @@ int main(){
 						concatenar += caracter;
 					}else if(esSepCadena(&caracter) == 1){
 						estado = 0;
+						archivo.unget();
 						if(esPalabraReser(&caracter) == 1){
 							printf("Palabra Reservada --> %s\n", concatenar.c_str());
 						}else{
 							printf("Identificador --> %s\n", concatenar.c_str());
 						}
-						concatenar += caracter;
-						printf("Separador --> %s\n", concatenar.c_str());
+						//concatenar += caracter;
+						//printf("Separador --> %s\n", concatenar.c_str());
 						concatenar = "";
 					}
 					else{
@@ -136,11 +139,18 @@ int main(){
 					if(isdigit(caracter)){
 						estado = 4;
 						concatenar += caracter;
+						archivo.get(caracter);
+						if(caracter == EOF){
+							printf("Numero --> %s\n", concatenar.c_str());
+						}else{
+							//archivo.unget();	
+						}
 					}else if(caracter == ','){
 						estado = 3;
 						concatenar += caracter;
 					}else if(esSepDigito(&caracter) == 1){
 						estado = 0;
+						archivo.unget();
 						printf("Numero --> %s\n", concatenar.c_str());
 						concatenar = "";
 					}else if(caracter == EOF){
@@ -164,6 +174,7 @@ int main(){
 						estado = 4;
 						concatenar += caracter;
 					}else if(esSepDigito(&caracter) == 1){
+						archivo.unget();
 						estado = 0;
 						printf("Numero --> %s\n", concatenar.c_str());
 						printf("Separador --> %c\n", caracter);
@@ -174,7 +185,8 @@ int main(){
 				break;
 				
 				case 5:
-					if(esSepOprComparacion(&caracter) == 1){
+					if(esOperadorComp(&caracter) == 1){
+						archivo.unget();
 						estado = 0;
 						printf("Op. Comparacion --> %s\n", concatenar.c_str());
 						concatenar = "";
@@ -184,10 +196,9 @@ int main(){
 				break;
 				
 				case 6:
-					if(esSepFuncionesMat(&caracter) == 1){
+					if(esOperadorArit(&caracter) == 1){
 						estado = 0;
-						printf("Op. Comparacion --> %s\n", concatenar.c_str());
-						printf("Separador --> %c", caracter);
+						printf("Op. Aritmitico --> %s\n", concatenar.c_str());
 						concatenar = "";
 					}else{
 						printf("Error en el caso 6\n");
@@ -216,6 +227,7 @@ int main(){
 				
 				case 9:
 					if(esSepParentesCerr(&caracter) == 1){
+						archivo.unget();
 						estado = 0;
 						printf("Parentesis --> %s\n", concatenar.c_str());
 						concatenar = "";
@@ -226,6 +238,7 @@ int main(){
 				
 				case 10:
 					if(esSepDelimitadors(&caracter) == 1){
+						archivo.unget();
 						estado = 0;
 						printf("Delimitadores --> %s\n", caracter);
 						concatenar = "";
