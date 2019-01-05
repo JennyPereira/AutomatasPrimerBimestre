@@ -24,7 +24,7 @@ int esSaltosDLinea(string palabra);
 
 /*										SEPARADORES (editando)									*/
 string sepCadenas [] = {" ",";", ":", "/", "*", "+", "-", "<", ">", "!", "="}; //separador para cadenas
-string sepDigitos [] = {" ", ")", "=", "/", "*", "+", "-", "<", ">", "!"}; //separador para digitos
+string sepDigitos [] = {" ", ")", "=", "/", "*", "+", "-", "<", ">", "!", ";"}; //separador para digitos
 string sepOprComp [] = {" ", "("}; //separador para Operaciones de comparacion
 string sepFuncMat [] = {" ", "("}; //separador para funciones matematicas
 string sepPareCer [] = {" ", "<", ">", "!", "+", "-", "/", "*", ")"};//separador para parentesis cerrado
@@ -64,7 +64,7 @@ int main(){
 		while(!archivo.eof()){
 			printf("estado = %d\n", estado);
 			archivo.get(caracter);
-			//printf("****caracter = %c****\n\n", caracter);
+			printf("****caracter = %c****\n\n", caracter);
 			
 			switch(estado){
 				case 0:
@@ -78,10 +78,11 @@ int main(){
 						estado = 3;
 						concatenar += caracter;
 					}else if(esOperadorComp(&caracter) == 1){
+						printf("Op. Comparacion --> %c\n", caracter);
 						estado = 5;
 						concatenar += caracter;
 					}else if(esOperadorArit(&caracter) == 1){
-						archivo.unget();
+						printf("Op. Aritmitico --> %c\n", caracter);
 						estado = 6;
 						concatenar += caracter;
 					}else if(caracter == opAsignacin){
@@ -139,12 +140,6 @@ int main(){
 					if(isdigit(caracter)){
 						estado = 4;
 						concatenar += caracter;
-						archivo.get(caracter);
-						if(caracter == EOF){
-							printf("Numero --> %s\n", concatenar.c_str());
-						}else{
-							//archivo.unget();	
-						}
 					}else if(caracter == ','){
 						estado = 3;
 						concatenar += caracter;
@@ -185,10 +180,9 @@ int main(){
 				break;
 				
 				case 5:
-					if(esOperadorComp(&caracter) == 1){
-						archivo.unget();
+					if(esSepOprComparacion(&caracter) == 1){
 						estado = 0;
-						printf("Op. Comparacion --> %s\n", concatenar.c_str());
+						printf("Separador Op.Com --> %s\n", concatenar.c_str());
 						concatenar = "";
 					}else{
 						printf("Error en el caso 5\n");
@@ -196,9 +190,13 @@ int main(){
 				break;
 				
 				case 6:
-					if(esOperadorArit(&caracter) == 1){
+					if(esSepFuncionesMat(&caracter) == 1){
 						estado = 0;
-						printf("Op. Aritmitico --> %s\n", concatenar.c_str());
+						printf("Separador Op.Arit --> %s\n", concatenar.c_str());
+						concatenar = "";
+					}else if(isalpha(caracter) || isdigit(caracter)){
+						archivo.unget();
+						estado = 0;
 						concatenar = "";
 					}else{
 						printf("Error en el caso 6\n");
@@ -237,10 +235,12 @@ int main(){
 				break;
 				
 				case 10:
-					if(esSepDelimitadors(&caracter) == 1){
+					if(esDelimitadors(&caracter) == 1){
+						printf("Delimitadores --> %c\n", caracter);
+					}else if(esSepDelimitadors(&caracter) == 1){
 						archivo.unget();
 						estado = 0;
-						printf("Delimitadores --> %s\n", caracter);
+						printf("Sep. Delimitadores --> %s\n", caracter);
 						concatenar = "";
 					}else{
 						printf("Error en el caso 10\n");
