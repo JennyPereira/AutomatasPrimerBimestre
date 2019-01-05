@@ -1,1 +1,6 @@
-5+5;
+Inicio: 
+entero a=18;
+	si(a>18){
+		imprimir ("Fin");
+	}
+Fin

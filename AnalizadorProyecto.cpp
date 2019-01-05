@@ -13,6 +13,7 @@ int esSepCadena(string palabra);
 int esSepDigito(string palabra);
 int esSepOprComparacion(string palabra);
 int esSepFuncionesMat(string palabra);
+int esSepParentesAbier(string palabra);
 int esSepParentesCerr(string palabra);
 int esSepDelimitadors(string palabra);
 
@@ -23,11 +24,12 @@ int esDelimitadors(string palabra);
 int esSaltosDLinea(string palabra);
 
 /*										SEPARADORES (editando)									*/
-string sepCadenas [] = {" ",";", ":", "/", "*", "+", "-", "<", ">", "!", "="}; //separador para cadenas
+string sepCadenas [] = {" ",";", ":", "/", "*", "+", "-", "<", ">", "!", "=", "(", "\""}; //separador para cadenas
 string sepDigitos [] = {" ", ")", "=", "/", "*", "+", "-", "<", ">", "!", ";"}; //separador para digitos
 string sepOprComp [] = {" ", "("}; //separador para Operaciones de comparacion
 string sepFuncMat [] = {" ", "("}; //separador para funciones matematicas
-string sepPareCer [] = {" ", "<", ">", "!", "+", "-", "/", "*", ")"};//separador para parentesis cerrado
+string sepParAbir [] = {" ", "(", "\""}; //separador para parentesis abierto
+string sepPareCer [] = {" ", "<", ">", "!", "+", "-", "/", "*", ")", "{", ";"};//separador para parentesis cerrado
 string sepDelimta [] = {" ", "\t", "\n"};
 
 /*												TOKENS											*/
@@ -40,7 +42,6 @@ string saltosdLin [] = {" ", "\n", "\t"};//para saltos de linea
 char opAsignacin = '=';
 char parenAbiert = '(';
 char parenCerrad = ')';
-char llaveCerrad = '}';
 char comillas = '"';
 
 ifstream archivo;
@@ -62,9 +63,9 @@ int main(){
 			
 		
 		while(!archivo.eof()){
-			printf("estado = %d\n", estado);
+			//printf("estado = %d\n", estado);
 			archivo.get(caracter);
-			printf("****caracter = %c****\n\n", caracter);
+			//printf("****caracter = %c****\n\n", caracter);
 			
 			switch(estado){
 				case 0:
@@ -80,33 +81,28 @@ int main(){
 					}else if(esOperadorComp(&caracter) == 1){
 						printf("Op. Comparacion --> %c\n", caracter);
 						estado = 5;
-						concatenar += caracter;
 					}else if(esOperadorArit(&caracter) == 1){
 						printf("Op. Aritmitico --> %c\n", caracter);
 						estado = 6;
-						concatenar += caracter;
 					}else if(caracter == opAsignacin){
+						printf("Op. Asignacion --> %c\n", caracter);
 						estado = 7;
-						concatenar += caracter;
 					}else if(caracter == parenAbiert){
+						printf("Paren. Abierto --> %c\n", caracter);
 						estado = 8;
-						concatenar += caracter; 
 					}else if(caracter == parenCerrad){
+						printf("Paren. Cerrado --> %c\n", caracter);
 						estado = 9;
-						concatenar += caracter;
 					}else if(esDelimitadors(&caracter) == 1){
+						printf("Es Delimitador --> %c\n", caracter);
 						estado = 10;
-						concatenar += caracter;
-					}else if(caracter == llaveCerrad){
-						estado = 11;
-						concatenar += caracter;
 					}else if(esSaltosDLinea(&caracter) == 1){
 						estado = 0;
-						printf("salto de línea, tab\n");
+						//printf("salto de linea, tab\n");
 					}else if(caracter = comillas){
 						estado = 0;
 						concatenar += caracter;
-						printf("comillas\n");
+						//printf("comillas\n");
 					}else{
 						printf("Error Case 0\n");
 					}
@@ -116,17 +112,23 @@ int main(){
 					if(isalpha(caracter)){
 						estado = 1;
 						concatenar += caracter;
+						if(concatenar == "Fin"){
+							printf("Palabra Reservada --> %s\n", concatenar.c_str());
+						}
 					}else if(isdigit(caracter)){
 						estado = 1;
 						concatenar += caracter;
 					}else if(esSepCadena(&caracter) == 1){
 						estado = 0;
-						archivo.unget();
-						if(esPalabraReser(&caracter) == 1){
+						if(caracter == '\"'){
+							concatenar += caracter;
+							printf("Msj. Impreso --> %s\n", concatenar.c_str());
+						}else if(esPalabraReser(concatenar) == 1){
 							printf("Palabra Reservada --> %s\n", concatenar.c_str());
 						}else{
 							printf("Identificador --> %s\n", concatenar.c_str());
 						}
+						archivo.unget();
 						//concatenar += caracter;
 						//printf("Separador --> %s\n", concatenar.c_str());
 						concatenar = "";
@@ -146,10 +148,10 @@ int main(){
 					}else if(esSepDigito(&caracter) == 1){
 						estado = 0;
 						archivo.unget();
-						printf("Numero --> %s\n", concatenar.c_str());
+						printf("Es un numero --> %s\n", concatenar.c_str());
 						concatenar = "";
 					}else if(caracter == EOF){
-						printf("Numero --> %s\n", concatenar.c_str());
+						printf("Es un numero --> %s\n", concatenar.c_str());
 					}else{
 						printf("Error en el Case 2\n");
 					}
@@ -171,8 +173,7 @@ int main(){
 					}else if(esSepDigito(&caracter) == 1){
 						archivo.unget();
 						estado = 0;
-						printf("Numero --> %s\n", concatenar.c_str());
-						printf("Separador --> %c\n", caracter);
+						printf("Es un numero --> %s\n", concatenar.c_str());
 						concatenar = "";
 					}else{
 						printf("Error en el caso 4\n");
@@ -183,6 +184,10 @@ int main(){
 					if(esSepOprComparacion(&caracter) == 1){
 						estado = 0;
 						printf("Separador Op.Com --> %s\n", concatenar.c_str());
+						concatenar = "";
+					}else if(isalpha(caracter) || isdigit(caracter)){
+						archivo.unget();
+						estado = 0;
 						concatenar = "";
 					}else{
 						printf("Error en el caso 5\n");
@@ -204,9 +209,13 @@ int main(){
 				break;
 				
 				case 7:
-					if(caracter == opAsignacin){
+					if(caracter == ' '){
 						estado = 0;
-						printf("Op. Asignacion --> %s\n", concatenar.c_str());
+						printf("Sep. Op.Asignacion --> %s\n", concatenar.c_str());
+						concatenar = "";
+					}else if(isalpha(caracter) || isdigit(caracter)){
+						archivo.unget();
+						estado = 0;
 						concatenar = "";
 					}else{
 						printf("Error en el caso 7\n");
@@ -214,9 +223,14 @@ int main(){
 				break;
 				
 				case 8:
-					if(caracter == ' '){
+					if(esSepParentesAbier(&caracter) == 1){
+						archivo.unget();
 						estado = 0;
-						printf("Parentesis --> %s\n", concatenar.c_str());
+						printf("Sep. Parentesis --> %s\n", concatenar.c_str());
+						concatenar = "";
+					}else if(isalpha(caracter) || isdigit(caracter)){
+						archivo.unget();
+						estado = 0;
 						concatenar = "";
 					}else{
 						printf("Error en el caso 8\n");
@@ -227,7 +241,7 @@ int main(){
 					if(esSepParentesCerr(&caracter) == 1){
 						archivo.unget();
 						estado = 0;
-						printf("Parentesis --> %s\n", concatenar.c_str());
+						printf("Sep. Parentesis --> %s\n", concatenar.c_str());
 						concatenar = "";
 					}else{
 						printf("Error en el caso 9\n");
@@ -235,8 +249,11 @@ int main(){
 				break;
 				
 				case 10:
-					if(esDelimitadors(&caracter) == 1){
-						printf("Delimitadores --> %c\n", caracter);
+					if(esSepDelimitadors(&caracter) == 1){
+						archivo.unget();
+						estado = 0;
+						//printf("Es Separador --> Tab/espacio\n");
+						concatenar = "";
 					}else if(esSepDelimitadors(&caracter) == 1){
 						archivo.unget();
 						estado = 0;
@@ -367,6 +384,19 @@ int esSepFuncionesMat(string letra){
 
 	for(i = 0; i < asize ; i++){
 		if((sepFuncMat[i].compare(letra)) == 0){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int esSepParentesAbier(string letra){
+	int i, asize, result;
+	i = asize = result = 0;
+	asize = sizeof(sepParAbir) / sizeof(sepParAbir[0]);
+	
+	for( i = 0 ; i < asize ; i++){
+		if((sepParAbir[i].compare(letra)) == 0){
 			return 1;
 		}
 	}
