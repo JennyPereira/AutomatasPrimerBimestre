@@ -1,6 +1,7 @@
-Inicio: 
-entero a=18;
-	si(a>18){
-		imprimir ("Fin");
-	}
-Fin
+Inicio : 
+entero sss; 
+	si( 4 >sss ) { 
+		sss = 4;
+		entero 3; 
+	} 
+Fin$
